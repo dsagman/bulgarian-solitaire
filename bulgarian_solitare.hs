@@ -14,49 +14,43 @@ data Run = Run {numCards   :: Int,
                 maxPiles   :: Int}
                 deriving (Show)
 
--- number of cards to simulate
-start :: Int
-start = 3
-stop :: Int
-stop  = 500
+type Deck = [[Int]]
 
-cards :: [Int]
-cards = [start..stop]
 
 -- The split is to just take one card, but that can be adjusted
-piles :: Int -> [[Int]]
+piles :: Int -> Deck
 piles x =  [[1..cut], [(cut + 1)..x]]
         where cut = 1
 
-takeAcard :: [[Int]] -> [[Int]]
+takeAcard :: Deck -> Deck
 takeAcard xs = filter (not . null) $ map head xs : map tail xs
 
-pileSize :: [[[Int]]] -> [[Int]]
+pileSize :: [Deck] -> Deck
 pileSize = map (sort . map length)
 
-hands :: Int -> [[Int]]
+hands :: Int -> Deck
 hands x = pileSize $ iterate takeAcard (piles x)
 
 -- The fields returned are:
---   The the list of hands -> [[Int]]
+--   The the list of hands -> Deck
 --   Index where repetition happens -> Maybe Int
-stopHands :: [[Int]] -> [[Int]] -> (Maybe Int,[[Int]])
+stopHands :: Deck -> Deck -> (Maybe Int, Deck)
 stopHands seen (x:xs)
         | x `elem` seen = ((+1) <$> elemIndex x seen, [x])
         | otherwise = (fst s, x : snd s)
                 where s = stopHands (seen ++ [x]) xs
 
-runs :: [Run]
-runs = [Run {numCards = x,
-             stopAt = length (snd (s x)),
-             repeatFrom = fst (s x),
-             maxPiles = maximum (map length (snd (s x)))
-             }| x <- cards]
-        where s x = stopHands [] (hands x)
+runs :: Int -> Int -> [Run]
+runs start stop = [Run {numCards = x,
+                   stopAt = length (snd (s x)),
+                   repeatFrom = fst (s x),
+                   maxPiles = maximum (map length (snd (s x)))
+                   }| x <- [start..stop]]
+                where s x = stopHands [] (hands x)
 
 -- These all functions are to be used for adding a graph
 -- But I have to figure out how to do plotting in Haskell
--- Call them with allxxxx runs
+-- Call them with allxxxx runs start stop
 allCycleLen :: [Run] -> [[Int]]
 allCycleLen rs = [[numCards r, stopAt r - fromJust (repeatFrom r)]| r <- rs]
 
@@ -75,12 +69,13 @@ formatr (Run  {numCards = a, stopAt =b, repeatFrom = c, maxPiles = d}) =
         ". Cycle length " ++ show (b - fromJust c) ++
         ". Maximum piles " ++ show d ++ "."
 
-
 main :: IO ()
 main = do
-        mapM_ print $ zip [1..] $ snd (stopHands [] (hands start))
-        mapM_ (print . formatr) runs
+        let start = 5
+        let stop  = 500
+        let results = runs start stop
+        mapM_ (print . formatr) results
         print "And now the card amounts that have cycle length 1:"
-        mapM_ print $ filter (\[_,x] -> x == 1) $ allCycleLen runs
+        mapM_ print $ filter (\[_,x] -> x == 1) $ allCycleLen results
 
 

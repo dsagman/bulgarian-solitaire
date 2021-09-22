@@ -14,15 +14,12 @@ from icecream import ic
 class Run:
     '''Object for the tracking of a complete hand of solitaire.'''
     numCards    : int
-    stopAt      : float
+    stopAt      : int
     repeatFrom  : int
     maxPiles    : int
 
-# number of cards to simulate
-start : int = 3
-stop  : int = 500
-
-cards : list = list(range(start,stop))
+def flatten(xs : list[int]) -> list[int]:
+    return [x for sublist in xs for x in sublist]
 
 def piles(x : int) -> list[list[int]]:
     # The split is to just take one card, but that can be adjusted
@@ -37,12 +34,34 @@ def takeAcard(xs : list[list[int]]) -> list[list[int]]:
             heads.append(h)
         if (t := x[1:]) != []:
             tails.append(t)
-    flat_tails = flattened = [i for sublist in tails for i in sublist]
-    return [heads, flat_tails]
+    return [heads] + tails
+
+def pileSize(xs : list[list[list[int]]]) -> list[list[int]]:
+    return map(sorted,map(len,xs))
+
+def hands(x : int) -> list[list[int]]:
+    return [[]]
+
+def stopHands(seen : list[list[int]], xs : list[list[int]]) -> tuple[int, list[list[int]]]:
+    return (0, [[]])
+
+def runs(start : int, stop: int) -> list[Run]:
+    cards = list(range(start,stop))
+    r = []
+    for x in cards:
+        r.append(Run(x, 0, 0, 0))
+    return r
 
 
-# have to finish the rest!
-ic(piles(10))
-ic(takeAcard(piles(10)))
+if __name__ == "__main__":
+    # number of cards to simulate
+    start : int = 3
+    stop  : int = 500
+    # have to finish the rest!
+    ic(piles(10))
+    ic(takeAcard(piles(10)))
+    ic(takeAcard(takeAcard(takeAcard(piles(10)))))
+    ic(takeAcard(takeAcard(takeAcard(takeAcard(piles(10))))))
+
 
 
