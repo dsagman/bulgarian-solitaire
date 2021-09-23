@@ -43,7 +43,6 @@ def stopHands(x : int) -> tuple[SeenAtIndex, Deck]:
 
 def oneRun(x : int) -> Run:
     fstS, sndS = stopHands(x)
-    ic(x, len(sndS), fstS, sndS)
     return Run(x, len(sndS), fstS, max(map(len,sndS)))
 
 def runs(start : int, stop: int) -> list[Run]:
