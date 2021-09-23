@@ -15,7 +15,7 @@ data Run = Run {numCards   :: Int,
                 deriving (Show)
 
 type Deck = [[Int]]
-
+type SeenAtIndex = Maybe Int
 
 -- The split is to just take one card, but that can be adjusted
 piles :: Int -> Deck
@@ -31,10 +31,7 @@ pileSize = map (sort . map length)
 hands :: Int -> Deck
 hands x = pileSize $ iterate takeAcard (piles x)
 
--- The fields returned are:
---   The the list of hands -> Deck
---   Index where repetition happens -> Maybe Int
-stopHands :: Deck -> Deck -> (Maybe Int, Deck)
+stopHands :: Deck -> Deck -> (SeenAtIndex, Deck)
 stopHands seen (x:xs)
         | x `elem` seen = ((+1) <$> elemIndex x seen, [x])
         | otherwise = (fst s, x : snd s)

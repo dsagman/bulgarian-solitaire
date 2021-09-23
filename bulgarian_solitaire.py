@@ -18,37 +18,28 @@ class Run:
     repeatFrom  : int
     maxPiles    : int
 
-def flatten(xs : list[int]) -> list[int]:
-    return [x for sublist in xs for x in sublist]
+Deck = list[list[int]]
+SeenAtIndex = int
 
-def piles(x : int) -> list[list[int]]:
+def piles(x : int) -> Deck:
     # The split is to just take one card, but that can be adjusted
     cut = 1
     return [list(range(1,cut+1)),(list(range(cut+1,x+1)))]
 
-def takeAcard(xs : list[list[int]]) -> list[list[int]]:
-    heads = []
-    tails = []
-    for x in xs:
-        if (h := x[0]) != []:
-            heads.append(h)
-        if (t := x[1:]) != []:
-            tails.append(t)
-    return [heads] + tails
+def takeAcard(xs : Deck) -> Deck:
+    return [[n.pop() for n in xs]] + list(filter(None, xs))
 
-def pileSize(xs : list[list[list[int]]]) -> list[list[int]]:
+def pileSize(xs : list[Deck]) -> Deck:
     return sorted(map(len,xs))
 
-def stopHands(x : int) -> tuple[int, list[list[int]]]:
-    hands = []
+def stopHands(x : int) -> tuple[SeenAtIndex, Deck]:
+    hands = [pileSize(piles(x))]
     aHand = takeAcard(piles(x))
     while (ps := pileSize(aHand)) not in hands:
         hands.append(ps)
         aHand = takeAcard(aHand)
-    found = 1 + hands.index(ps)
-    if hands[-1] != ps:
-        hands.append(ps)
-    return (found,hands)
+    hands.append(ps)
+    return (hands.index(ps) + 1,hands)
 
 def oneRun(x : int) -> Run:
     fstS, sndS = stopHands(x)
@@ -62,8 +53,9 @@ def runs(start : int, stop: int) -> list[Run]:
 if __name__ == "__main__":
     # number of cards to simulate
     start : int = 3
-    stop  : int = 10
-    ic(runs(start, stop))
+    stop  : int = 15
+    allRuns = runs(start, stop)
+    for r in allRuns:
+        print(f"{r.numCards} cards. Index {r.stopAt} = index {r.repeatFrom}. Cycle length {r.stopAt - r. repeatFrom}. Maximum piles {r.maxPiles}.")
 
-##### MISSING FIRST ELEMENT OF HANDS, UGH. FIX!!!!
 
