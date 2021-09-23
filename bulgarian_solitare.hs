@@ -40,13 +40,15 @@ stopHands seen (x:xs)
         | otherwise = (fst s, x : snd s)
                 where s = stopHands (seen ++ [x]) xs
 
-runs :: Int -> Int -> [Run]
-runs start stop = [Run {numCards = x,
+oneRun :: Int -> Run
+oneRun x = Run {numCards = x,
                    stopAt = length (snd (s x)),
                    repeatFrom = fst (s x),
                    maxPiles = maximum (map length (snd (s x)))
-                   }| x <- [start..stop]]
-                where s x = stopHands [] (hands x)
+               } where s x = stopHands [] (hands x)
+
+runs :: Int -> Int -> [Run]
+runs start stop = [oneRun x | x <- [start..stop]]
 
 -- These all functions are to be used for adding a graph
 -- But I have to figure out how to do plotting in Haskell
@@ -62,7 +64,7 @@ allMaxPiles rs = [[numCards r, maxPiles r] | r <- rs]
 
 -- helper function for formatting output of runs
 formatr :: Run -> [Char]
-formatr (Run  {numCards = a, stopAt =b, repeatFrom = c, maxPiles = d}) =
+formatr Run {numCards = a, stopAt =b, repeatFrom = c, maxPiles = d} =
         show a ++ " cards. " ++
         "Index " ++ show b ++
         " = index " ++ show (fromJust c) ++
@@ -71,8 +73,8 @@ formatr (Run  {numCards = a, stopAt =b, repeatFrom = c, maxPiles = d}) =
 
 main :: IO ()
 main = do
-        let start = 5
-        let stop  = 500
+        let start = 3
+        let stop  = 50
         let results = runs start stop
         mapM_ (print . formatr) results
         print "And now the card amounts that have cycle length 1:"

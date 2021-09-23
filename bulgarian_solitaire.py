@@ -37,31 +37,33 @@ def takeAcard(xs : list[list[int]]) -> list[list[int]]:
     return [heads] + tails
 
 def pileSize(xs : list[list[list[int]]]) -> list[list[int]]:
-    return map(sorted,map(len,xs))
+    return sorted(map(len,xs))
 
-def hands(x : int) -> list[list[int]]:
-    return [[]]
+def stopHands(x : int) -> tuple[int, list[list[int]]]:
+    hands = []
+    aHand = takeAcard(piles(x))
+    while (ps := pileSize(aHand)) not in hands:
+        hands.append(ps)
+        aHand = takeAcard(aHand)
+    found = 1 + hands.index(ps)
+    if hands[-1] != ps:
+        hands.append(ps)
+    return (found,hands)
 
-def stopHands(seen : list[list[int]], xs : list[list[int]]) -> tuple[int, list[list[int]]]:
-    return (0, [[]])
+def oneRun(x : int) -> Run:
+    fstS, sndS = stopHands(x)
+    ic(x, len(sndS), fstS, sndS)
+    return Run(x, len(sndS), fstS, max(map(len,sndS)))
 
 def runs(start : int, stop: int) -> list[Run]:
-    cards = list(range(start,stop))
-    r = []
-    for x in cards:
-        r.append(Run(x, 0, 0, 0))
+    r = [oneRun(x) for x in range(start,stop)]
     return r
-
 
 if __name__ == "__main__":
     # number of cards to simulate
     start : int = 3
-    stop  : int = 500
-    # have to finish the rest!
-    ic(piles(10))
-    ic(takeAcard(piles(10)))
-    ic(takeAcard(takeAcard(takeAcard(piles(10)))))
-    ic(takeAcard(takeAcard(takeAcard(takeAcard(piles(10))))))
+    stop  : int = 10
+    ic(runs(start, stop))
 
-
+##### MISSING FIRST ELEMENT OF HANDS, UGH. FIX!!!!
 
